@@ -12,7 +12,7 @@ export abstract class BaseWebXRApp {
         this.scene = new THREE.Scene();
 
         this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-        this.camera.position.set( 0, 1.6, 3 );
+        this.camera.position.set(0, 1.6, 2);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true })
         this.renderer.setPixelRatio(window.devicePixelRatio);

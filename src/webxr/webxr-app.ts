@@ -89,7 +89,7 @@ export class WebXRApp extends BaseWebXRApp {
         loader.load(terminal, (gltf: GLTF) => {
             self.computer = gltf.scene;
             self.computer.scale.set(0.3,0.3,0.3);
-            self.computer.position.set(0, 1, -3);
+            self.computer.position.set(0, 1, 0);
             self.computer.rotateY(-90 * (Math.PI/180))
             self.scene.add(gltf.scene);
             self.renderer.setAnimationLoop(self.render.bind(self));
