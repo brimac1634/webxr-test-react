@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import { DirectionalLight } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 // import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 import { BaseWebXRApp } from './base-webxr-app';
 import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry';
@@ -22,11 +21,11 @@ export class WebXRApp extends BaseWebXRApp {
         this.controls.target.set(0, 1.6, 0);
         this.controls.update();
 
-        // this.initScene();
+        this.initScene();
         this.addLighting();
         this.setupXR();
         
-        this.loadGLTF();
+        
         // this.loadFBX();
         // this.cube = new Cube();
         // this.scene.add(this.cube);
@@ -47,22 +46,38 @@ export class WebXRApp extends BaseWebXRApp {
         return Math.random() * (max-min) + min;
     }
 
-    private initScene() {
-        const radius = 0.08;
-        
-        this.room.geometry.translate(0,3,0);
-        this.scene.add(this.room);
+    private async initScene(): Promise<void> {
+        try {
+            this.room.geometry.translate(0,3,0);
+            this.scene.add(this.room);
 
-        const geometry = new THREE.IcosahedronBufferGeometry(radius, 2);
+            // const gltf = await this.loadGLTF(terminal);
 
-        for (let i = 0; i < 200; i++) {
-            const object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: Math.random() * 0xFFFFFF }));
-            object.position.x = this.random(-2, 2);
-            object.position.y = this.random(-2, 2);
-            object.position.z = this.random(-2, 2);
+            // if (gltf) {
+            //     const computer = gltf.scene;
+            //     computer.scale.set(0.15,0.15,0.15);
+            //     computer.position.set(0, 1, -1);
+            //     computer.rotateY(-90 * (Math.PI/180))
+            //     this.room.add(computer)
+            //     this.renderer.setAnimationLoop(this.render.bind(this));
+            // }
 
-            this.room.add(object)
+            const radius = 0.08;
+            const geometry = new THREE.IcosahedronBufferGeometry(radius, 4);
+
+            for (let i = 0; i < 100; i++) {
+                const object = new THREE.Mesh(geometry, new THREE.MeshLambertMaterial({ color: Math.random() * 0xFFFFFF }));
+                object.position.x = this.random(-2, 2);
+                object.position.y = this.random(-2, 2);
+                object.position.z = this.random(-2, 2);
+
+                this.room.add(object)
+            }
+        } catch(err) {
+            console.log('unable to load scene');
         }
+
+        
     }
 
     private setupXR() {
@@ -71,48 +86,18 @@ export class WebXRApp extends BaseWebXRApp {
     }
 
 
-    private animate() {
-        requestAnimationFrame(() => this.animate())
+    // private animate() {
+    //     requestAnimationFrame(() => this.animate())
     
-        if (this.computer) {
-            this.computer.rotation.y += 0.01
-        }
+    //     if (this.computer) {
+    //         this.computer.rotation.y += 0.01
+    //     }
     
-        this.controls.update()
+    //     this.controls.update()
     
-        this.render()
-    }
-
-    private loadGLTF() {
-        const self = this;
-        const loader = new GLTFLoader();
-        loader.load(terminal, (gltf: GLTF) => {
-            self.computer = gltf.scene;
-            self.computer.scale.set(0.3,0.3,0.3);
-            self.computer.position.set(0, 1, 0);
-            self.computer.rotateY(-90 * (Math.PI/180))
-            self.scene.add(gltf.scene);
-            self.renderer.setAnimationLoop(self.render.bind(self));
-        }, (xhr: ProgressEvent<EventTarget>) => {
-            console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-        }, (error: ErrorEvent) => {
-            console.log(`Error: ${error.message}`);
-        })
-    }
-
-    // private loadFBX() {
-    //     const self = this;
-    //     const loader = new FBXLoader().setPath('../assets/');
-    //     loader.load('InteriorTest.fbx', (object: THREE.Group) => {
-    //         self.computer = object;
-    //         self.scene.add(object);
-    //         self.renderer.setAnimationLoop(self.render.bind(self));
-    //     }, (xhr: ProgressEvent<EventTarget>) => {
-    //         console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-    //     }, (error: ErrorEvent) => {
-    //         console.log(`Error: ${error.message}`);
-    //     })
+    //     this.render()
     // }
+
 }
 
 

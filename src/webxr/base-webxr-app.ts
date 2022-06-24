@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 export abstract class BaseWebXRApp {
     protected scene: THREE.Scene;
@@ -36,4 +37,32 @@ export abstract class BaseWebXRApp {
     protected render() {
         this.renderer.render(this.scene, this.camera)
     }
+
+    protected async loadGLTF(gltf: any): Promise<GLTF | undefined> {
+        return new Promise((resolve, reject) => {
+            const loader = new GLTFLoader();
+            loader.load(gltf, (gltf: GLTF) => {
+                resolve(gltf);
+            }, (xhr: ProgressEvent<EventTarget>) => {
+                console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+            }, (error: ErrorEvent) => {
+                console.log(`Error: ${error.message}`);
+                resolve(undefined);
+            })
+        })
+    }
+
+    // protected loadFBX() {
+    //     const self = this;
+    //     const loader = new FBXLoader().setPath('../assets/');
+    //     loader.load('InteriorTest.fbx', (object: THREE.Group) => {
+    //         self.computer = object;
+    //         self.scene.add(object);
+    //         self.renderer.setAnimationLoop(self.render.bind(self));
+    //     }, (xhr: ProgressEvent<EventTarget>) => {
+    //         console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    //     }, (error: ErrorEvent) => {
+    //         console.log(`Error: ${error.message}`);
+    //     })
+    // }
 }
