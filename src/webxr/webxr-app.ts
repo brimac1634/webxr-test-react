@@ -2,30 +2,33 @@ import * as THREE from 'three'
 import { DirectionalLight } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 // import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
+import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory';
 import { BaseWebXRApp } from './base-webxr-app';
 import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry';
-import { VRButton } from 'three/examples/jsm/webxr/VRButton';
-import terminal from './assets/terminal.glb';
+import { VRButton } from './components/vr-button';
+// import terminal from './assets/terminal.glb';
 // import { Cube } from './components/cube';
 
 export class WebXRApp extends BaseWebXRApp {
-    private controls: OrbitControls;
-    private room: THREE.LineSegments;
-    private computer: THREE.Group | undefined;
+    private _controls: OrbitControls;
+    private _room: THREE.LineSegments;
+    private _raycaster: THREE.Raycaster;
+    private _workingMatrix: THREE.Matrix4;
+    // private computer: THREE.Group | undefined;
 
     constructor() {
         super();
         
-        this.room = new THREE.LineSegments(new BoxLineGeometry(6,6,6,10,10,10), new THREE.LineBasicMaterial({ color: 0x808080 }))
-        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-        this.controls.target.set(0, 1.6, 0);
-        this.controls.update();
+        this._room = new THREE.LineSegments(new BoxLineGeometry(6,6,6,10,10,10), new THREE.LineBasicMaterial({ color: 0x808080 }))
+        this._controls = new OrbitControls(this.camera, this.renderer.domElement)
+        this._controls.target.set(0, 1.6, 0);
+        this._controls.update();
 
         this.initScene();
         this.addLighting();
-        this.setupXR();
         
-        
+        this._raycaster = new THREE.Raycaster();
+        this._workingMatrix = new THREE.Matrix4();
         // this.loadFBX();
         // this.cube = new Cube();
         // this.scene.add(this.cube);
@@ -48,8 +51,8 @@ export class WebXRApp extends BaseWebXRApp {
 
     private async initScene(): Promise<void> {
         try {
-            this.room.geometry.translate(0,3,0);
-            this.scene.add(this.room);
+            this._room.geometry.translate(0,3,0);
+            this.scene.add(this._room);
 
             // const gltf = await this.loadGLTF(terminal);
 
@@ -71,19 +74,15 @@ export class WebXRApp extends BaseWebXRApp {
                 object.position.y = this.random(-2, 2);
                 object.position.z = this.random(-2, 2);
 
-                this.room.add(object)
+                this._room.add(object)
             }
         } catch(err) {
             console.log('unable to load scene');
         }
 
         
-    }
+    }   
 
-    private setupXR() {
-        this.renderer.xr.enabled = true;
-        document.body.appendChild(VRButton.createButton(this.renderer));
-    }
 
 
     // private animate() {

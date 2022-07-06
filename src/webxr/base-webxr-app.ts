@@ -1,10 +1,13 @@
 import * as THREE from 'three'
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory';
+import { VRButton } from './components/vr-button';
 
 export abstract class BaseWebXRApp {
     protected scene: THREE.Scene;
     protected camera: THREE.PerspectiveCamera;
     protected renderer: THREE.WebGLRenderer;
+    protected controllers: THREE.XRTargetRaySpace[] = [];
 
     constructor() {
         const container = document.createElement( 'div' );
@@ -21,6 +24,8 @@ export abstract class BaseWebXRApp {
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         container.appendChild( this.renderer.domElement );
 
+        this.setupXR();
+
         this.handleWindowResize();
     }
 
@@ -34,7 +39,53 @@ export abstract class BaseWebXRApp {
         window.addEventListener('resize', onWindowResize, false)
     }
 
+    private buildControllers(){
+        const controllerModelFactory = new XRControllerModelFactory();
+
+        const geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 )]);
+
+        const line = new THREE.Line(geometry);
+        line.name = 'line';
+		line.scale.z = 10;
+        
+        const controllers = [];
+        
+        for(let i=0; i<=1; i++){
+            const controller = this.renderer.xr.getController( i );
+            controller.add( line.clone() );
+            controller.userData.selectPressed = false;
+            this.scene.add( controller );
+            
+            controllers.push( controller );
+            
+            const grip = this.renderer.xr.getControllerGrip( i );
+            grip.add( controllerModelFactory.createControllerModel( grip ) );
+            this.scene.add( grip );
+        }
+        
+        return controllers;
+    }
+
+    private setupXR() {
+        this.renderer.xr.enabled = true;
+        
+        new VRButton(this.renderer);
+
+        this.controllers = this.buildControllers();
+    }
+
+    private handleController(controller: THREE.XRTargetRaySpace){
+        
+    }
+
     protected render() {
+        if (this.controllers ){
+            const self = this;
+            this.controllers.forEach((controller) => { 
+                self.handleController(controller) 
+            });
+        }
+
         this.renderer.render(this.scene, this.camera)
     }
 

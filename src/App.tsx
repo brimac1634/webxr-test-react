@@ -6,7 +6,7 @@ function App() {
   useEffect(() => {
     const webXR = new WebXRApp();
   }, [])
-  console.log('test change')
+  
   return (
     <div className="App">
 
